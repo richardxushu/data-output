@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd  
+	 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd"
+	default-autowire="byName">
+	<context:property-placeholder location="classpath:hbase.properties" />
+
+	<bean id="qualifierCodec"
+		class="com.taotaosou.data.client.hbase.codec.DefaultQualifierCodec" />
+	<bean id="tableFactory" class="com.taotaosou.data.client.hbase.DefaultTableFactory" />
+	<bean id="tableProvider" class="com.taotaosou.data.client.hbase.DefaultTableProvider"
+		init-method="init" destroy-method="close">
+		<constructor-arg name="tableFactory" ref="tableFactory" />
+		<constructor-arg name="maxSize"
+			value="${hbase.exporter.tablePoolSize}" />
+		<constructor-arg name="poolType"
+			value="${hbase.exporter.tablePoolType}" />
+	</bean>
+	<bean id="hbaseClient" class="com.taotaosou.data.client.hbase.DefaultHBaseClient"
+		destroy-method="close">
+		<property name="qualifierCodec" ref="qualifierCodec" />
+		<property name="tableProvider" ref="tableProvider" />
+	</bean>
+
+	<bean id="fullProductReader"
+		class="com.taotaosou.data.himport.client.hbase.FullProductLabelReaderSample"
+		init-method="init">
+		<property name="tableName" value="${hbase.exporter.tableName}" />
+		<property name="familyName" value="${hbase.exporter.familyName}" />
+	</bean>
+
+</beans>

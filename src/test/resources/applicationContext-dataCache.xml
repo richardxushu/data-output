@@ -1,0 +1,197 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:jdbc="http://www.springframework.org/schema/jdbc"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+     http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd"
+	default-autowire="byName">
+
+	<context:annotation-config />
+
+	<bean id="dataCache" class="com.taotaosou.data.cachedata.DataCache"
+		init-method="init">
+		<property name="skirtsCodes" value="${front.category.skirts}" />
+		<property name="accessoriesCodes" value="${front.category.accessories}" />
+		<property name="shoesCodes" value="${front.category.shoes}" />
+		<property name="pantsCodes" value="${front.category.pants}" />
+		<property name="jacketCodes" value="${front.category.jacket}" />
+		<property name="bagsCodes" value="${front.category.bags}" />
+	
+		<property name="tagSet">
+			<set>
+				<value>T恤</value>
+				<value>风衣</value>
+				<value>护士服</value>
+				<value>紧身衣</value>
+				<value>空姐服</value>
+				<value>打底衫</value>
+				<value>礼服</value>
+				<value>连衣裙</value>
+				<value>露腰装</value>
+				<value>毛衣</value>
+				<value>内衣</value>
+				<value>女装</value>
+				<value>外套</value>
+				<value>性感内衣</value>
+				<value>文胸套装</value>
+				<value>羽绒服</value>
+				<value>针织</value>
+				<value>制服</value>
+				<value>吊带衫</value>
+				<value>衬衫</value>
+				<value>纯棉</value>
+				<value>大毛领</value>
+				<value>大衣</value>
+				<value>短外套</value>
+				<value>服装</value>
+				<value>茧形外套</value>
+				<value>开衫</value>
+				<value>蕾丝衫</value>
+				<value>雪纺衫</value>
+				<value>连身衣</value>
+				<value>连体泳衣</value>
+				<value>镂空</value>
+				<value>马夹</value>
+				<value>毛呢外套</value>
+				<value>毛针织衫</value>
+				<value>棉服</value>
+				<value>呢大衣</value>
+				<value>呢外套</value>
+				<value>女童裙装</value>
+				<value>皮草</value>
+				<value>皮衣</value>
+				<value>卫衣</value>
+				<value>绒衫</value>
+				<value>西装</value>
+				<value>衣服</value>
+				<value>瑜伽服</value>
+				<value>羽绒</value>
+				<value>运动POLO衫</value>
+				<value>运动T恤</value>
+				<value>运动套装</value>
+				<value>运动卫衣</value>
+				<value>套头衫</value>
+				<value>针织衫</value>
+				<value>低帮鞋</value>
+				<value>高帮鞋</value>
+				<value>高跟鞋</value>
+				<value>靴子</value>
+				<value>重金属</value>
+				<value>板鞋</value>
+				<value>休闲鞋</value>
+				<value>单鞋</value>
+				<value>登山鞋</value>
+				<value>短靴</value>
+				<value>帆布鞋</value>
+				<value>防滑学步鞋</value>
+				<value>篮球鞋</value>
+				<value>凉鞋</value>
+				<value>马丁靴</value>
+				<value>女鞋</value>
+				<value>跑步鞋</value>
+				<value>骑士靴</value>
+				<value>徒步鞋</value>
+				<value>越野跑鞋</value>
+				<value>雪地靴</value>
+				<value>运动鞋</value>
+				<value>综合训练鞋</value>
+				<value>室内健身鞋</value>
+				<value>配饰</value>
+				<value>首饰</value>
+				<value>宝宝头饰</value>
+				<value>儿童配饰</value>
+				<value>耳钉</value>
+				<value>耳环</value>
+				<value>耳夹</value>
+				<value>耳套</value>
+				<value>发饰</value>
+				<value>假花</value>
+				<value>翡翠</value>
+				<value>宝石</value>
+				<value>戒指</value>
+				<value>指环</value>
+				<value>毛衣链</value>
+				<value>帽子</value>
+				<value>披肩</value>
+				<value>品牌手表</value>
+				<value>流行手表</value>
+				<value>苹果保护套</value>
+				<value>苹果保护壳</value>
+				<value>钱包</value>
+				<value>卡套</value>
+				<value>手表</value>
+				<value>手机贴纸</value>
+				<value>手链</value>
+				<value>手镯</value>
+				<value>首饰盒</value>
+				<value>太阳镜</value>
+				<value>玉石</value>
+				<value>珍珠</value>
+				<value>围巾</value>
+				<value>手套</value>
+				<value>丝巾</value>
+				<value>披肩</value>
+				<value>相框</value>
+				<value>镶钻</value>
+				<value>项链</value>
+				<value>吊坠</value>
+				<value>胸针</value>
+				<value>腰带</value>
+				<value>皮带</value>
+				<value>腰链</value>
+				<value>钻石</value>
+				<value>打底裤</value>
+				<value>牛仔裤</value>
+				<value>童装裤子</value>
+				<value>运动长裤</value>
+				<value>半身裙</value>
+				<value>休闲裤</value>
+				<value>裙子</value>
+				<value>短裤</value>
+				<value>包包</value>
+				<value>单肩包</value>
+				<value>复古包</value>
+				<value>旅行箱</value>
+				<value>铆钉包</value>
+				<value>女包</value>
+				<value>手提包</value>
+				<value>双肩包</value>
+				<value>箱包</value>
+				<value>斜挎包</value>
+				<value>太空包</value>
+				<value>only</value>
+				<value>欧时力</value>
+				<value>阿卡</value>
+				<value>香奈儿</value>
+				<value>巴宝莉</value>
+				<value>春</value>
+				<value>夏</value>
+				<value>秋</value>
+				<value>冬</value>
+				<value>灰</value>
+				<value>红</value>
+				<value>黑</value>
+				<value>白</value>
+				<value>粉</value>
+				<value>创意饰品</value>
+				<value>时装秀</value>
+				<value>时装周</value>
+				<value>潮流趋势</value>
+				<value>范冰冰</value>
+				<value>张柏芝</value>
+				<value>孙俪</value>
+				<value>辣妈正传</value>
+				<value>绯闻女孩</value>
+			</set>
+		</property>
+
+	</bean>
+
+
+
+</beans>

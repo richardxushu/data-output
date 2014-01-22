@@ -1,0 +1,181 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="
+     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+     http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd
+     http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd
+     http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
+     http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd  
+	 http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd"
+	default-autowire="byName">
+
+	<context:annotation-config />
+
+	<!-- 使用annotation 自动注册bean,并检查@Required,@Autowired的属性已被注入 -->
+	<context:component-scan base-package="com.taotaosou.tts,com.taotaosou.data">
+		<context:exclude-filter type="annotation"
+			expression="org.springframework.stereotype.Controller" />
+	</context:component-scan>
+
+
+	<context:property-placeholder
+		location="classpath:config.properties,classpath:hbase.properties,classpath:category.properties" />
+
+	<import resource="classpath:applicationContext-increase.xml" />
+	<import resource="classpath:applicationContext-hbase.xml" />
+	<import resource="classpath:applicationContext-dataCache.xml" />
+
+
+	<!-- 数据库配置 -->
+	<bean id="ttsDS" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${db.driver}" />
+		<property name="url" value="${db.tts.url}" />
+		<property name="username" value="${db.tts.username}" />
+		<property name="password" value="${db.tts.password}" />
+		<property name="validationQuery" value="${db.validationQuery}" />
+		<property name="testOnBorrow" value="${db.testOnBorrow}" />
+		<property name="initialSize" value="${db.initialSize}" />
+		<property name="maxIdle" value="${db.maxIdle}" />
+	</bean>
+
+	<bean id="findDataSource" class="org.apache.commons.dbcp.BasicDataSource"
+		destroy-method="close">
+		<property name="driverClassName" value="${db.driver}" />
+		<property name="url" value="${db.find.url}" />
+		<property name="username" value="${db.find.username}" />
+		<property name="password" value="${db.find.password}" />
+		<property name="validationQuery" value="${db.validationQuery}" />
+		<property name="testOnBorrow" value="${db.testOnBorrow}" />
+		<property name="initialSize" value="${db.initialSize}" />
+		<property name="maxIdle" value="${db.maxIdle}" />
+	</bean>
+
+	<!-- IBATIS 的映射文件配置 -->
+	<bean id="sqlMapClient_taotaosou" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation">
+			<value>classpath:ibatis/sqlMapConfig_taotaosou.xml</value>
+		</property>
+		<property name="dataSource">
+			<ref local="ttsDS" />
+		</property>
+	</bean>
+
+	<bean id="sqlMapClient_find" class="org.springframework.orm.ibatis.SqlMapClientFactoryBean">
+		<property name="configLocation">
+			<value>classpath:ibatis/sqlMapConfig_find.xml</value>
+		</property>
+		<property name="dataSource">
+			<ref local="findDataSource" />
+		</property>
+	</bean>
+
+	<!-- 数据库路由规则 -->
+	<bean id="dbRouteConfig" class="com.taotaosou.common.persistence.router.DBRouteConfig">
+		<property name="sqlMapList">
+			<map>
+				<entry key="ttsDao">
+					<ref local="sqlMapClient_taotaosou" />
+				</entry>
+				<entry key="find">
+					<ref local="sqlMapClient_find" />
+				</entry>
+			</map>
+		</property>
+	</bean>
+
+	<bean id="queryDelegate" class="com.taotaosou.common.persistence.IbatisQueryDelegate">
+		<property name="dbRouteConfig" ref="dbRouteConfig" />
+	</bean>
+
+	<bean id="entityDelegate" class="com.taotaosou.common.persistence.IbatisEntityDelegate">
+		<property name="dbRouteConfig" ref="dbRouteConfig" />
+	</bean>
+
+	<bean id="productAdditionJob" class="com.taotaosou.data.increase.ProductAdditionJob"
+		init-method="init">
+
+	</bean>
+
+
+	<!-- 定义任务 -->
+	<bean id="starDataTask"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="starDataJob"></property>
+		<property name="targetMethod">
+			<value>outputData</value>
+		</property>
+	</bean>
+
+	<bean id="mqIncreaseTask"
+		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="productAdditionJob"></property>
+		<property name="targetMethod">
+			<value>start</value>
+		</property>
+	</bean>
+
+
+	<!-- 定时器 -->
+	<bean id="timingTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="starDataTask" />
+		</property>
+		<property name="cronExpression" value="${star.data.output.expression}" />
+	</bean>
+
+	<bean id="mqIncreaseTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+		<property name="jobDetail">
+			<ref bean="mqIncreaseTask" />
+		</property>
+		<property name="cronExpression" value="${mq.increase.time.expression}" />
+	</bean>
+
+
+	<!-- 定时执行 -->
+	<bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean"
+		autowire="no">
+		<property name="triggers">
+			<list>
+				<!-- 任务列表 -->
+				<ref bean="timingTrigger" />
+				<!-- <ref bean="mqIncreaseTrigger" /> -->
+			</list>
+		</property>
+	</bean>
+
+	<!-- <bean id="appInfo" class="com.taotaosou.common.lang.AppInfo"> <property 
+		name="jarLocation"> <bean class="com.taotaosou.common.lang.FileUtil" factory-method="getClassFilePath"> 
+		<constructor-arg value="com.taotaosou.tsearch.index.data.Booter" /> </bean> 
+		</property> </bean> -->
+
+
+	<!-- Email Service -->
+	<!-- <bean id="emailManager" class="com.taotaosou.tsearch.index.data.manager.EmailManager"> 
+		<property name="from" value="${email.from}" /> <property name="hostname" 
+		value="${email.hostname}" /> <property name="user" value="${email.user}" 
+		/> <property name="pass" value="${email.pass}" /> <property name="to" value="${email.to}" 
+		/> <property name="cc" value="${email.cc}" /> </bean> -->
+	<!-- Email Service -->
+
+	<bean id="topClient" class="com.taotaosou.common.topclient.DefaultTopProxyClient"
+		init-method="init" destroy-method="destroy">
+		<property name="appId" value="${tts.main.appId}" />
+		<property name="topServer" value="${tts.topServer}" />
+		<property name="topProxyServer" value="${tts.topProxyServer}" />
+	</bean>
+
+	<bean id="searchClient"
+		class="com.taotaosou.search.client.service.impl.DefaultSearchClient"
+		init-method="init">
+		<property name="clientId" value="1" />
+		<property name="proxyServerUrl" value="${searchproxy.proxyServerUrl}" />
+		<property name="socketTimeout" value="${searchproxy.socketTimeout}" />
+		<property name="connectionTimeout" value="${searchproxy.connectionTimeout}" />
+	</bean>
+
+</beans>
