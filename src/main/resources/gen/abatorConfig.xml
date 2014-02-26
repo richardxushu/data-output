@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE abatorConfiguration PUBLIC "-//Apache Software Foundation//DTD Abator for iBATIS Configuration 1.0//EN" "http://ibatis.apache.org/dtd/abator-config_1_0.dtd" >
+<abatorConfiguration >
+  <abatorContext >
+    <jdbcConnection driverClass="com.mysql.jdbc.Driver" connectionURL="jdbc:mysql://199.155.122.200:3306/tts_spider_deploy?characterEncoding=utf-8" userId="root" password="root" >
+      <classPathEntry location="C:\Users\Administrator\.m2\repository\mysql\mysql-connector-java\5.1.26\mysql-connector-java-5.1.26.jar" />
+    </jdbcConnection>
+    <javaModelGenerator targetPackage="com.taotaosou.data.model" targetProject="data-output/src/main/java" />
+    <sqlMapGenerator targetPackage="ibatis.mapping" targetProject="data-output/src/main/resources" />
+    <daoGenerator targetPackage="com.taotaosou.data.dao" targetProject="data-output/src/main/java" type="GENERIC-CI" />
+    <table schema="tts_spider_deploy" tableName="t_spider_seller_info" >
+     <columnOverride column="seller_id" property="sellerId" />
+     <columnOverride column="credit_grade" property="creditGrade" />
+    </table>
+   <table schema="tts_spider_deploy" tableName="t_spider_style_shop" >
+    </table>
+  </abatorContext>
+</abatorConfiguration>

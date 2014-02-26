@@ -12,6 +12,13 @@
 	default-autowire="byName">
 
 	<context:annotation-config />
+	
+	
+	<bean id="backCategoryCache" class="com.taotaosou.data.cachedata.BackCategoryCache" init-method="init"
+		destroy-method="close">
+		<property name="backCategoryUrl" value="${back.category.list}" />
+		<property name="httpConnector" ref="httpConnector" />
+	</bean>
 
 	<bean id="dataCache" class="com.taotaosou.data.cachedata.DataCache"
 		init-method="init">
@@ -21,7 +28,7 @@
 		<property name="pantsCodes" value="${front.category.pants}" />
 		<property name="jacketCodes" value="${front.category.jacket}" />
 		<property name="bagsCodes" value="${front.category.bags}" />
-	
+
 		<property name="tagSet">
 			<set>
 				<value>T恤</value>
@@ -164,29 +171,6 @@
 				<value>箱包</value>
 				<value>斜挎包</value>
 				<value>太空包</value>
-				<value>only</value>
-				<value>欧时力</value>
-				<value>阿卡</value>
-				<value>香奈儿</value>
-				<value>巴宝莉</value>
-				<value>春</value>
-				<value>夏</value>
-				<value>秋</value>
-				<value>冬</value>
-				<value>灰</value>
-				<value>红</value>
-				<value>黑</value>
-				<value>白</value>
-				<value>粉</value>
-				<value>创意饰品</value>
-				<value>时装秀</value>
-				<value>时装周</value>
-				<value>潮流趋势</value>
-				<value>范冰冰</value>
-				<value>张柏芝</value>
-				<value>孙俪</value>
-				<value>辣妈正传</value>
-				<value>绯闻女孩</value>
 			</set>
 		</property>
 

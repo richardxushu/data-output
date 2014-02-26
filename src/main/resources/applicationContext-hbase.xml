@@ -37,5 +37,6 @@
 		<property name="tableName" value="${hbase.exporter.tableName}" />
 		<property name="familyName" value="${hbase.exporter.familyName}" />
 	</bean>
+	
 
 </beans>

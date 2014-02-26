@@ -34,6 +34,7 @@ import com.taotaosou.data.himport.client.hbase.domain.ProductLabel;
  * @author lanxin.liao
  * @version 2013-8-28 下午4:53:07
  */
+@Ignore
 @ContextConfiguration(locations = { "classpath:applicationContext.xml" })
 public class FullProductLabelReaderTest extends
 		AbstractJUnit4SpringContextTests {
@@ -49,7 +50,7 @@ public class FullProductLabelReaderTest extends
 	@Resource
 	private HBaseClient hbaseClient;
 
-//	@Ignore
+	@Ignore
 	@Test
 	public void testRead() {
 

@@ -47,7 +47,13 @@ public class TsearchClientProxy {
      */
     public List<String> getAnalyzedWords(String words) {
         if (words == null) return null;
-        List<String> tmpTagList = searchClient.getAnalyzedWords(words);
+        List<String> tmpTagList = null;
+        try {
+            tmpTagList = searchClient.getAnalyzedWords(words);
+        } catch (Exception e) {
+            logger.error("getAnalyzedWords words error:", e);
+
+        }
         if (tmpTagList == null) return null;
         List<String> tagList = new ArrayList<String>();
         for (String tag : tmpTagList) {

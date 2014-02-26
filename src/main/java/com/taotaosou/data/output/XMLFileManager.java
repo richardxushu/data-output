@@ -26,7 +26,12 @@ import org.dom4j.io.XMLWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import com.taotaosou.data.cachedata.BackCategoryCache;
 import com.taotaosou.data.himport.client.hbase.domain.ProductLabel;
+import com.taotaosou.data.model.BaseProduct;
+import com.taotaosou.data.model.Product360;
+import com.taotaosou.data.model.SampleProduct;
+import com.taotaosou.data.mq.proto.ProductLabelDataMessage.ProductLabelPBDataMessage;
 import com.taotaosou.data.tsearch.TsearchClientProxy;
 import com.taotaosou.search.client.service.SearchClient;
 
@@ -35,22 +40,20 @@ import com.taotaosou.search.client.service.SearchClient;
  * @version $Id: XMLFileWriter.java, v 0.1 2014-1-9
  */
 @Service("xmlManager")
-public class XMLFileManager {
+public class XMLFileManager implements FileManager{
 
     // public static final String OUTPUT_PATH =
     // InitSystemProperty.getInstance().getSysProMapValue(
     // "xml.output.path");
     public static final String  OUTPUT_PATH = "F:/data/";
 
-    public static final String  FIXED_TAGS  = "服饰搭配$$百搭";
-
     private static final Logger logger      = Logger.getLogger(XMLFileManager.class);
-
-    private static final String STYLE_TAG   = XMLFileManager.class.getClassLoader().getResource("").getPath()
-                                              + "config/styleTags.txt";
 
     @Autowired
     private TsearchClientProxy tsearchClientProxy;
+    
+    @Autowired
+    private BackCategoryCache backCategoryCache;
 
 
     private OutputFormat        format      = OutputFormat.createCompactFormat();
@@ -66,7 +69,7 @@ public class XMLFileManager {
         // format.setIndent(" "); //以空格方式实现缩进
         format.setNewlines(true); // 设置是否换行
         try {
-            File f = new File(OUTPUT_PATH+"data_"+System.currentTimeMillis()+".xml");
+            File f = new File(OUTPUT_PATH+"360Sample_"+System.currentTimeMillis()+".xml");
             
             writer = new XMLWriter(new FileOutputStream(f), format);
             writer.setEscapeText(false);
@@ -91,19 +94,33 @@ public class XMLFileManager {
         // Element item = document.addElement("item");
     }
     
-    public synchronized void process(List<ProductLabel> plList) {
+    public void process(List<ProductLabel> plList) {
         if (doc == null) {
             init();
         }
-        if(doc.getRootElement().nodeCount()>10000)
+        if(doc.getRootElement().nodeCount()>10000){
+            System.out.println("node size: " + doc.getRootElement().nodeCount());
             this.reloadXMl();
+        }
+            
         
-        this.addItem(plList);
+        Element document = doc.getRootElement();
+        
+        for(ProductLabel proLabel: plList){
+            Product360 pro = new Product360();
+            pro.convert(proLabel, tsearchClientProxy, backCategoryCache);
+            ObjectToDocument.addItemElement(document, pro);
+            
+//            String proData = GSON.toJson(sp);
+//            this.writeProduct(proData);
+        }
+        
+//        this.addItem(plList);
     }
     
     
     public void reloadXMl(){
-        this.finish();
+        this.close();
         this.init();
     }
 
@@ -116,6 +133,7 @@ public class XMLFileManager {
             e.printStackTrace();
         }
     }
+    
     
     private void addItem(List<ProductLabel> plList) {
         Element document = doc.getRootElement();
@@ -145,7 +163,7 @@ public class XMLFileManager {
         }
     }
     
-    public void finish() {
+    public void close() {
         try {
             writer.write(doc);
         } catch (IOException e) {
@@ -163,51 +181,41 @@ public class XMLFileManager {
 
     }
 
-    // /**
-    // * 商品标题通过分词生成图片标题
-    // *
-    // * @param title
-    // * @return
-    // */
-    // public static String getPicTitle(String title) {
-    // String[] tagsArr = AliSplitWordsUtil.getAliAnalysis(title);
-    // if (tagsArr == null || tagsArr.length <= 0) {
-    // return "";
-    // }
-    // StringBuffer picTitle = new StringBuffer();
-    // for (int i = 0; i < ((tagsArr.length < 5) ? tagsArr.length : 5); i++) {
-    // picTitle.append(tagsArr[i]);
-    // }
-    // return picTitle.toString();
-    // }
-
-    /**
-     * 生成标签字段
-     * 
-     * @param title
-     * @return
-     * @throws FileNotFoundException
+    /* (non-Javadoc)
+     * @see com.taotaosou.data.output.FileManager#reloadWriter(java.lang.Integer)
      */
-    public static String queryTags(String title, String categoryName) throws FileNotFoundException {
-        String tags = FIXED_TAGS;
-        File file = new File(STYLE_TAG);
-        Scanner sc = new Scanner(file);
-        String tagString = "";
-        while (sc.hasNextLine()) {
-            String line = sc.nextLine();
-            tagString += line;
-        }
-        String[] tagsArr = tagString.split(";");
-        List<String> styleTags = new ArrayList<String>(Arrays.asList(tagsArr));
-        for (String tag : styleTags) {
-            if (title.contains(tag)) {
-                tags += "$$" + tag;
-            }
-        }
-        if (categoryName != null && !"".equals(categoryName)) {
-            categoryName = categoryName.replace("\"", "");
-            tags += "$$" + categoryName;
-        }
-        return tags;
+    @Override
+    public void reloadWriter(Integer writerId) {
+        // TODO Auto-generated method stub
+        
     }
+
+    /* (non-Javadoc)
+     * @see com.taotaosou.data.output.FileManager#process(java.util.List, java.lang.Integer)
+     */
+    @Override
+    public void process(List<ProductLabel> plList, Integer writerId) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.taotaosou.data.output.FileManager#processNotify(java.util.List, java.lang.Integer)
+     */
+    @Override
+    public void processNotify(List<ProductLabelPBDataMessage> plbList, Integer writerId) {
+        // TODO Auto-generated method stub
+        
+    }
+
+    /* (non-Javadoc)
+     * @see com.taotaosou.data.output.FileManager#setProduct(com.taotaosou.data.model.BaseProduct)
+     */
+    @Override
+    public void setProduct(BaseProduct product) {
+        // TODO Auto-generated method stub
+        
+    }
+
+
 }

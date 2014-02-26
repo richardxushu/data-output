@@ -5,6 +5,7 @@
  */
 package com.taotaosou.data.increase;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Resource;
@@ -16,9 +17,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.taotaosou.common.pool.IBatchExecutor;
+import com.taotaosou.data.constants.DataConstants;
 import com.taotaosou.data.himport.client.mq.ProductLabelNotifyClient;
 import com.taotaosou.data.model.ProductBaidu;
 import com.taotaosou.data.mq.proto.ProductLabelDataMessage.ProductLabelPBDataMessage;
+import com.taotaosou.data.output.FileManager;
 import com.taotaosou.data.output.JsonFileManager;
 import com.taotaosou.data.tsearch.TsearchClientProxy;
 import com.taotaosou.search.client.service.SearchClient;
@@ -34,24 +37,48 @@ public class ProductAllIncHandler implements IBatchExecutor<ProductLabelPBDataMe
 
     private static final Logger logger = LoggerFactory.getLogger(ProductAllIncHandler.class);
 
-    @Resource
-    private JsonFileManager     jsonFileManager;
-    
-    @Autowired
-    private TsearchClientProxy      tsearchClientProxy;
+    @Resource(name = "jsonFileManager")
+    private FileManager         fileManager;
 
+    @Autowired
+    private TsearchClientProxy  tsearchClientProxy;
+
+    /*
+     * (non-Javadoc)
+     * @see com.taotaosou.common.pool.IBatchExecutor#execute(java.util.List)
+     */
     /*
      * (non-Javadoc)
      * @see com.taotaosou.common.pool.IBatchExecutor#execute(java.util.List)
      */
     @Override
     public void execute(List<ProductLabelPBDataMessage> records) {
+        // filter todo...先简单的filter一下，后面这部分可以抽出来
+        List<ProductLabelPBDataMessage> baiduPicList = new ArrayList<ProductLabelPBDataMessage>();
+        List<ProductLabelPBDataMessage> tszList = new ArrayList<ProductLabelPBDataMessage>();
+
         for (ProductLabelPBDataMessage pl : records) {
-            ProductBaidu product = new ProductBaidu();
-//            product.convert(pl, tsearchClientProxy);
-            String data = GSON.toJson(product);
-            jsonFileManager.allWriteProduct(data);
+            // logger.info("pl.getId()-----------------------------: " + pl.getId());
+            // logger.info("pl.getOperation(): " + pl.getOperation());
+            // logger.info("pl.getOnsaleFlag: " + pl.getOnsaleFlag());
+
+            // if (pl.getIntegrity() > 4 && pl.getUpdatedFields() != null
+            // && pl.getUpdatedFields().indexOf("mainImagePath") != -1) {
+
+            if (pl.getIntegrity() < 6) {
+
+                logger.info("pl.getId()-----------------------------: " + pl.getId());
+                logger.info("pl.getIntegrity(): " + pl.getIntegrity());
+                logger.info("pl.getOperation(): " + pl.getOperation());
+                logger.info("pl.getOnsaleFlag: " + pl.getOnsaleFlag());
+                logger.info("pl.getUpdatedFields: " + pl.getUpdatedFields());
+
+                baiduPicList.add(pl);
+            }
         }
+
+        fileManager.processNotify(baiduPicList, DataConstants.BAIDU_INC_WRITER_ID);
+        // fileManager.processNotify(tszList, DataConstants.TSZ_INC_WRITER_ID);
     }
 
 }

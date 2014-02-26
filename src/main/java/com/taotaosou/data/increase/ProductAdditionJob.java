@@ -20,31 +20,46 @@ import com.taotaosou.data.mq.proto.ProductLabelDataMessage.ProductLabelPBDataMes
 import com.taotaosou.data.output.XMLFileManager;
 
 /**
- * @author ChaoKai Wen email:regis.wen@taotaosou.com
- * @version
- * @since Ver 1.1
- * @Date 2012-5-17
+ * 类ProductAIncHandler.java的实现描述：mq client定时任务
+ * 
+ * @author Richard.xu 2014年1月11日 上午10:02:52
  */
 
 public class ProductAdditionJob {
 
-    private static final Logger                           logger        = Logger.getLogger(ProductAdditionJob.class);
+    private static final Logger      logger        = Logger.getLogger(ProductAdditionJob.class);
 
     // 全库
     @Autowired
     @Qualifier("productLabelClient")
-    private ProductLabelNotifyClient                      productLabelClient;
+    private ProductLabelNotifyClient productLabelClient;
     // AB库
     @Autowired
     @Qualifier("smartProductLabelClient")
-    private ProductLabelNotifyClient                      smartProductLabelClient;
+    private ProductLabelNotifyClient smartProductLabelClient;
 
-    private Executor                                      executor      = Executors.newFixedThreadPool(2);
+    private Executor                 executor      = Executors.newFixedThreadPool(2);
 
-    private boolean                                       isInitSuccess = false;
+    private boolean                  isInitSuccess = false;
+
+    private boolean                  open          = true;
 
     // @Resource
     // public TopicStatisticsManager topicStatManager;
+
+    /**
+     * @return the open
+     */
+    public boolean isOpen() {
+        return open;
+    }
+
+    /**
+     * @param open the open to set
+     */
+    public void setOpen(boolean open) {
+        this.open = open;
+    }
 
     @Resource
     private DelayExecuteBuffer<ProductLabelPBDataMessage> productABuffer;
@@ -53,6 +68,9 @@ public class ProductAdditionJob {
     private DelayExecuteBuffer<ProductLabelPBDataMessage> productAllBuffer;
 
     public void init() {
+        if(!this.isOpen())
+            return;
+        
         logger.info("正在进行ProductAcceptor的初始化工作");
         try {
             productLabelClient.init();
@@ -65,20 +83,12 @@ public class ProductAdditionJob {
             isInitSuccess = false;
             throw new IllegalArgumentException("T-Notify Product Client初始化出错");
         }
-        start();
-
-        // ProductLabelPBDataMessage productLabelPB = null;
-        // try {
-        // productLabelPB = productLabelClient.collectMessage();
-        //
-        // } catch (Exception e) {
-        // // TODO Auto-generated catch block
-        // e.printStackTrace();
-        // }
-
     }
 
     public void start() {
+        if(!this.isOpen())
+            return;
+        
         if (null == productLabelClient || null == smartProductLabelClient || !isInitSuccess) throw new IllegalArgumentException(
                                                                                                                                 "T-Notify ProductLabel Client初始化出错");
         logger.info("商品增量更新信息程序启动成功，开始获取商品增量数据");
@@ -91,18 +101,18 @@ public class ProductAdditionJob {
                     ProductLabelPBDataMessage productLabelPB = null;
                     try {
                         productLabelPB = productLabelClient.collectMessage();
-//                        if (null == productLabelPB) {
-//                            logger.warn("[ALL] ProductLabelPB is NULL!!!");
-//                            return;
-//                        } else if (productLabelPB.getOperation() != null && productLabelPB.getOperation().length() >= 1) {
-//                            // logger.info(message);
-//                            // 将mq中的增量信息进行处理。
-//                       //     productAllBuffer.add(productLabelPB);
-//
-//                        } else {
-//                            logger.warn("[AB] Operation is Error!!!");
-//                            return;
-//                        }
+                        if (null == productLabelPB) {
+                            logger.warn("[ALL] ProductLabelPB is NULL!!!");
+                            return;
+                        } else if (productLabelPB.getOperation() != null && productLabelPB.getOperation().length() >= 1) {
+                            // logger.info(message);
+                            // 将mq中的增量信息进行处理。
+                            productAllBuffer.add(productLabelPB);
+
+                        } else {
+                            logger.warn("[AB] Operation is Error!!!");
+                            return;
+                        }
                     } catch (Exception e) {
                         logger.error("", e);
                         return;
@@ -119,8 +129,7 @@ public class ProductAdditionJob {
             public void run() {
                 while (true) {
                     ProductLabelPBDataMessage productLabelPB = null;
-                    
-                    
+
                     try {
                         productLabelPB = smartProductLabelClient.collectMessage();
                         if (null == productLabelPB) {
@@ -129,7 +138,7 @@ public class ProductAdditionJob {
                         } else if (productLabelPB.getOperation() != null && productLabelPB.getOperation().length() >= 1) {
 
                             // 将mq中的增量信息进行处理。
-                       //     productABuffer.add(productLabelPB);
+                            // productABuffer.add(productLabelPB);
 
                         } else {
                             logger.warn("[AB] Operation is Error!!!");
@@ -143,36 +152,6 @@ public class ProductAdditionJob {
                 }
             }
         });
-    }
-
-    public void getMqIncdataRichard() {
-        if (null == productLabelClient || null == smartProductLabelClient || !isInitSuccess) throw new IllegalArgumentException(
-                                                                                                                                "T-Notify ProductLabel Client初始化出错");
-        logger.info("商品增量更新信息程序启动成功，开始获取商品增量数据");
-        // 优质商品增量
-        while (true) {
-            ProductLabelPBDataMessage productLabelPB = null;
-            try {
-                productLabelPB = productLabelClient.collectMessage();
-                // productLabelPB = smartProductLabelClient.collectMessage();
-                if (null == productLabelPB) {
-                    logger.warn("[AB] ProductLabelPB is NULL!!!");
-                    return;
-                } else if (productLabelPB.getOperation() != null && productLabelPB.getOperation().length() >= 1) {
-
-                    // 将mq中的增量信息进行处理。
-                    // productABuffer.add(productLabelPB);
-
-                } else {
-                    logger.warn("[AB] Operation is Error!!!");
-                    return;
-                }
-            } catch (Exception e) {
-                logger.error("", e);
-                return;
-            }
-
-        }
     }
 
 }

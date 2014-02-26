@@ -23,6 +23,7 @@ import com.taotaosou.data.output.JsonFileManager;
  * 类JsonFileManangerTest.java的实现描述：TODO 类实现描述 
  * @author Richard.xu 2014年1月14日 下午8:01:41
  */
+@Ignore
 @ContextConfiguration(locations = { "classpath:applicationContext.xml" })
 public class StarDataJobTest extends AbstractJUnit4SpringContextTests {
 

@@ -7,9 +7,12 @@
  */
 package com.taotaosou.data.filterchain;
 
+import java.util.ArrayList;
 import java.util.List;
 
+import com.taotaosou.common.uri.image.ImageURIBroker;
 import com.taotaosou.data.himport.client.hbase.domain.ProductLabel;
+import com.taotaosou.data.himport.client.hbase.domain.ProductPro;
 import com.taotaosou.data.mq.proto.ProductLabelDataMessage.ProductLabelPBDataMessage;
 
 /**
@@ -19,25 +22,20 @@ import com.taotaosou.data.mq.proto.ProductLabelDataMessage.ProductLabelPBDataMes
 public class ImageSizeProductFilter implements ProductFilter{
 
     /* (non-Javadoc)
-     * @see com.taotaosou.data.filterchain.ProductFilter#filterProduct()
+     * @see com.taotaosou.data.filterchain.ProductFilter#filterProductLabel(com.taotaosou.data.himport.client.hbase.domain.ProductPro)
      */
     @Override
-    public void filterProductLabel(List<ProductLabel> list){
+    public void filterProductLabel(ProductPro product) {
+        if(product==null)
+            return;
+        
+        
+        ImageURIBroker.getInstance().getURI(product.getImagePath());
+        
+        product.getImagePath();
         // TODO Auto-generated method stub
         
     }
 
-    /* (non-Javadoc)
-     * @see com.taotaosou.data.filterchain.ProductFilter#filterProduct(java.util.List)
-     */
-    @Override
-    public void filterProduct(List<ProductLabelPBDataMessage> list) {
-       if(list==null||list.size()==0)
-           return;
-       for(ProductLabelPBDataMessage pl: list){
-//           pl.
-       }
-        
-    }
 
 }

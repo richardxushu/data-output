@@ -21,6 +21,7 @@ import com.taotaosou.data.increase.StarDataJob;
  * 类ProductAddtionJobTest.java的实现描述：TODO 类实现描述 
  * @author Richard.xu 2014年1月15日 上午11:50:26
  */
+@Ignore
 @ContextConfiguration(locations = { "classpath:applicationContext.xml" })
 public class ProductAddtionJobTest extends AbstractJUnit4SpringContextTests {
 

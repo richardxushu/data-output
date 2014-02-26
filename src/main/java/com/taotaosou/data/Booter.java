@@ -26,7 +26,7 @@ public class Booter {
 		ApplicationContext ctx = new ClassPathXmlApplicationContext(
 				new String[] { "classpath:applicationContext.xml" });
 		
-		ctx.getBean("");
+//		ctx.getBean("fullProductReader");
 		
 		System.out.println("init spring context = " + ctx.toString());
 	}

@@ -23,7 +23,7 @@
 
 
 	<context:property-placeholder
-		location="classpath:config.properties,classpath:hbase.properties,classpath:category.properties" />
+		location="classpath:config.properties,classpath:hbase.properties,classpath:category.properties,classpath:writer.properties" />
 
 	<import resource="classpath:applicationContext-increase.xml" />
 	<import resource="classpath:applicationContext-hbase.xml" />
@@ -96,9 +96,12 @@
 		<property name="dbRouteConfig" ref="dbRouteConfig" />
 	</bean>
 
+	<!-- <bean id="productAdditionJob" class="com.taotaosou.data.increase.ProductAdditionJob"> 
+		</bean> -->
+
 	<bean id="productAdditionJob" class="com.taotaosou.data.increase.ProductAdditionJob"
 		init-method="init">
-
+		<property name="open" value="${open.mq.client}" />
 	</bean>
 
 
@@ -111,11 +114,11 @@
 		</property>
 	</bean>
 
-	<bean id="mqIncreaseTask"
+	<bean id="incWriterReloadTask"
 		class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
-		<property name="targetObject" ref="productAdditionJob"></property>
+		<property name="targetObject" ref="jsonFileManager"></property>
 		<property name="targetMethod">
-			<value>start</value>
+			<value>reloadIncWriter</value>
 		</property>
 	</bean>
 
@@ -128,11 +131,11 @@
 		<property name="cronExpression" value="${star.data.output.expression}" />
 	</bean>
 
-	<bean id="mqIncreaseTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
+	<bean id="incWriterReloadTrigger" class="org.springframework.scheduling.quartz.CronTriggerBean">
 		<property name="jobDetail">
-			<ref bean="mqIncreaseTask" />
+			<ref bean="incWriterReloadTask" />
 		</property>
-		<property name="cronExpression" value="${mq.increase.time.expression}" />
+		<property name="cronExpression" value="${inc.writer.reload.time.expression}" />
 	</bean>
 
 
@@ -143,7 +146,7 @@
 			<list>
 				<!-- 任务列表 -->
 				<ref bean="timingTrigger" />
-				<!-- <ref bean="mqIncreaseTrigger" /> -->
+				<ref bean="incWriterReloadTrigger" />
 			</list>
 		</property>
 	</bean>
@@ -177,5 +180,27 @@
 		<property name="socketTimeout" value="${searchproxy.socketTimeout}" />
 		<property name="connectionTimeout" value="${searchproxy.connectionTimeout}" />
 	</bean>
+
+	<bean id="httpConnector" class="com.taotaosou.data.util.PooledHttpClient"
+		destroy-method="closeAll">
+		<!-- maxTotalConnections -->
+		<constructor-arg index="0">
+			<value>50</value>
+		</constructor-arg>
+		<!-- maxConnectionsPerHost -->
+		<constructor-arg index="1">
+			<value>30</value>
+		</constructor-arg>
+		<!-- connectionTimeout -->
+		<constructor-arg index="2">
+			<value>5000</value>
+		</constructor-arg>
+		<!-- connectionStaleChecking -->
+		<constructor-arg index="3">
+			<value>false</value>
+		</constructor-arg>
+	</bean>
+
+
 
 </beans>

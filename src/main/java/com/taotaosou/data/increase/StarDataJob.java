@@ -5,11 +5,7 @@
  */
 package com.taotaosou.data.increase;
 
-import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,33 +55,33 @@ public class StarDataJob {
     
 
     public void outputData() {
-        jsonFileManager.reloadWriter();
-        
-        int page = 1;
-        Date startTime = DateUtil.getStartOfDate(new Date());
-        Date endTime = new Date();
-        
-        // 4 is movie star
-        List<QandADetailBean> resultList = findServiceCom.fingByCategory("4", page, startTime, endTime);
-
-        while(resultList!=null&&resultList.size()>0){
-            for (QandADetailBean bean : resultList) {
-                Map<String, Object> resMap = this.convert(bean);
-
-                if (resMap == null) continue;
-
-                String starData = GSON.toJson(resMap.get("starFind"));
-                String productData = GSON.toJson(resMap.get("productBaidu"));
-
-                jsonFileManager.writeStar(starData);
-                jsonFileManager.writeProduct(productData);
-            }
-            page++;
-            resultList = findServiceCom.fingByCategory("4", page, startTime, endTime);
-        }
-        
-        jsonFileManager.flush();
-       
+//        jsonFileManager.reloadWriter();
+//        
+//        int page = 1;
+//        Date startTime = DateUtil.getStartOfDate(new Date());
+//        Date endTime = new Date();
+//        
+//        // 4 is movie star
+//        List<QandADetailBean> resultList = findServiceCom.fingByCategory("4", page, startTime, endTime);
+//
+//        while(resultList!=null&&resultList.size()>0){
+//            for (QandADetailBean bean : resultList) {
+//                Map<String, Object> resMap = this.convert(bean);
+//
+//                if (resMap == null) continue;
+//
+//                String starData = GSON.toJson(resMap.get("starFind"));
+//                String productData = GSON.toJson(resMap.get("productBaidu"));
+//
+////                jsonFileManager.writeStar(starData);
+//                jsonFileManager.writeProduct(productData);
+//            }
+//            page++;
+//            resultList = findServiceCom.fingByCategory("4", page, startTime, endTime);
+//        }
+//        
+//        jsonFileManager.flush();
+//       
     }
 
     // public ProductBaidu genProductData(StarFind starFind) {

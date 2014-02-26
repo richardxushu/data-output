@@ -40,8 +40,6 @@ public class ProductBaidu {
     private int          num       = 999;
     private String       user_name = "tts2012731";
     private String       time      = System.currentTimeMillis() + "";
-    private String       operation;                                  // test
-    private String       mainImgUrl;                                 // test
 
     public ProductBaidu convert(ProductLabelPBDataMessage proLabel, TsearchClientProxy tsearchClientProxy,
                                 DataCache dataCache) {
@@ -53,7 +51,6 @@ public class ProductBaidu {
         List<String> imgList = new ArrayList<String>();
         imgList.add(proLabel.getMainImagePath());
         this.obj_url = imgList;
-        this.mainImgUrl = proLabel.getMainImageUrl();
         this.from_url = "http://www.taotaosou.com/product-" + proLabel.getId()
                         + "--.html?utm_source=baidupic&utm_medium=pic&utm_campaign=baidu";
         this.buy_url = this.from_url;
@@ -64,8 +61,6 @@ public class ProductBaidu {
             priceInt = proLabel.getPrice();
         }
         this.price = PriceUtil.formatPriceDouble(priceInt);
-
-        this.operation = proLabel.getOperation();
 
         return this;
     }

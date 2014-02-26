@@ -33,6 +33,7 @@ import com.taotaosou.search.client.service.SearchClient;
 /**
  * @author Richard.xu
  * @version $Id: XMLFileWriter.java, v 0.1 2014-1-9
+ * @deprecated
  */
 @Service("xmlAppendManager")
 public class XMLAppendFileManager {
@@ -47,8 +48,7 @@ public class XMLAppendFileManager {
                                               + "config/styleTags.txt";
 
     @Autowired
-    private TsearchClientProxy tsearchClientProxy;
-
+    private TsearchClientProxy  tsearchClientProxy;
 
     private OutputFormat        format      = OutputFormat.createCompactFormat();
 
@@ -118,10 +118,10 @@ public class XMLAppendFileManager {
             anchortext.setText("<![" + pl.getProductTitle() + "]]>");
             alttext.setText("<![" + pl.getProductTitle() + "]]>");
 
-//            tag.setText("<![" + tsearchClientProxy.getAnalyzedWordsStr(pl.getProductTitle()) + "]]>");
+            // tag.setText("<![" + tsearchClientProxy.getAnalyzedWordsStr(pl.getProductTitle()) + "]]>");
         }
     }
-    
+
     private void addItemAppend(List<ProductLabel> plList) {
         Element document = doc.getRootElement();
 
@@ -146,11 +146,11 @@ public class XMLAppendFileManager {
             anchortext.setText("<![" + pl.getProductTitle() + "]]>");
             alttext.setText("<![" + pl.getProductTitle() + "]]>");
 
-//            tag.setText("<![" + tsearchClientProxy.getAnalyzedWordsStr(pl.getProductTitle()) + "]]>");
+            // tag.setText("<![" + tsearchClientProxy.getAnalyzedWordsStr(pl.getProductTitle()) + "]]>");
         }
     }
-    
-    public void flush(){
+
+    public void flush() {
         try {
             writer.write(doc);
             writer.flush();

@@ -50,12 +50,12 @@ public class ProductAIncHandler implements IBatchExecutor<ProductLabelPBDataMess
      */
     @Override
     public void execute(List<ProductLabelPBDataMessage> records) {
-        for (ProductLabelPBDataMessage pl : records) {
-            ProductBaidu product = new ProductBaidu();
-            product.convert(pl, tsearchClientProxy, dataCache);
-            String data = GSON.toJson(product);
-            jsonFileManager.writeProduct(data);
-        }
+//        for (ProductLabelPBDataMessage pl : records) {
+//            ProductBaidu product = new ProductBaidu();
+//            product.convert(pl, tsearchClientProxy, dataCache);
+//            String data = GSON.toJson(product);
+//            jsonFileManager.writeProduct(data);
+//        }
     }
 
 }
